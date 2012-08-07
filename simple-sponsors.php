@@ -4,7 +4,7 @@ Plugin Name: Simple Sponsors
 Plugin URI: http://plugins.findingsimple.com
 Description: Build a library of Sponsors.
 Version: 1.0
-Author: Finding Simple ( Jason Conroy & Brent Shepherd)
+Author: Finding Simple ( Jason Conroy & Brent Shepherd )
 Author URI: http://findingsimple.com
 License: GPL2
 */
@@ -29,7 +29,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 if ( ! class_exists( 'Simple_Sponsors' ) ) :
 
 /**
- * So that themes and other plugins can customise the text domain, the Simple_Quotes
+ * So that themes and other plugins can customise the text domain, the Simple_Sponsors
  * should not be initialized until after the plugins_loaded and after_setup_theme hooks.
  * However, it also needs to run early on the init hook.
  *
@@ -73,9 +73,9 @@ class Simple_Sponsors {
 		
 		add_filter( 'post_updated_messages', array( __CLASS__, 'updated_messages' ) );
 		
-		//add_action( 'add_meta_boxes', array( __CLASS__, 'add_meta_box' ) );
+		add_action( 'add_meta_boxes', array( __CLASS__, 'add_meta_box' ) );
 		
-		//add_action( 'save_post', array( __CLASS__, 'save_meta' ), 10, 1 );
+		add_action( 'save_post', array( __CLASS__, 'save_meta' ), 10, 1 );
 		
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_admin_styles_and_scripts' ) );
 		
@@ -110,7 +110,7 @@ class Simple_Sponsors {
 			'show_ui' => true, 
 			'query_var' => true,
 			'has_archive' => false,
-			'rewrite' => array( 'slug' => 'quote', 'with_front' => false ),
+			'rewrite' => array( 'slug' => 'sponsor', 'with_front' => false ),
 			'capability_type' => 'post',
 			'hierarchical' => false,
 			'menu_position' => null,
@@ -172,32 +172,24 @@ class Simple_Sponsors {
 	 * @wp-action add_meta_boxes
 	 */
 	public static function add_meta_box() {
-		add_meta_box( 'quote-citation', __( 'Citation', self::$text_domain  ), array( __CLASS__, 'do_meta_box' ), 'simple_quote', 'normal', 'high' );
+		add_meta_box( 'sponsor-meta', __( 'Sponsor Meta', self::$text_domain  ), array( __CLASS__, 'do_meta_box' ), 'simple_sponsor', 'normal', 'high' );
 	}
 
 	/**
-	 * Output the citation meta box HTML
+	 * Output the sponsor meta box HTML
 	 *
 	 * @param WP_Post $object Current post object
 	 * @param array $box Metabox information
 	 */
 	public static function do_meta_box( $object, $box ) {
-		wp_nonce_field( basename( __FILE__ ), 'quote-citation' );
+		wp_nonce_field( basename( __FILE__ ), 'sponsor-meta' );
 ?>
-
-		<p>
-			<label for="quote-citation-source-name"><?php _e( 'Source Name:', self::$text_domain ); ?></label>
-			<br />
-			<input type="text" name="quote-citation-source-name" id="quote-citation-source-name"
-				value="<?php echo esc_attr( get_post_meta( $object->ID, 'quote-citation-source-name', true ) ); ?>"
-				size="30" tabindex="30" style="width: 99%;" />
-		</p>
 		
 		<p>
-			<label for="quote-citation-source-url"><?php _e( 'Source URL:', self::$text_domain ); ?></label>
+			<label for="sponsor-url"><?php _e( 'Sponsor URL:', self::$text_domain ); ?></label>
 			<br />
-			<input type="url" name="quote-citation-source-url" id="quote-citation-source-url"
-				value="<?php echo esc_attr( get_post_meta( $object->ID, 'quote-citation-source-url', true ) ); ?>"
+			<input type="url" name="sponsor-url" id="sponsor-url"
+				value="<?php echo esc_attr( get_post_meta( $object->ID, 'sponsor-url', true ) ); ?>"
 				size="30" tabindex="30" style="width: 99%;" />
 		</p>
 
@@ -214,12 +206,11 @@ class Simple_Sponsors {
 		$prefix = hybrid_get_prefix();
 
 		/* Verify the nonce before proceeding. */
-		if ( !isset( $_POST['quote-citation'] ) || !wp_verify_nonce( $_POST['quote-citation'], basename( __FILE__ ) ) )
+		if ( !isset( $_POST['sponsor-meta'] ) || !wp_verify_nonce( $_POST['sponsor-meta'], basename( __FILE__ ) ) )
 			return $post_id;
 
 		$meta = array(
-			'quote-citation-source-name',
-			'quote-citation-source-url'
+			'sponsor-url'
 		);
 
 		foreach ( $meta as $meta_key ) {
@@ -272,54 +263,60 @@ class Simple_Sponsors {
 	 * @internal Template tag for use in templates
 	 */
 	/**
-	 * Get the testimonial source's name
+	 * Get the sponsor's name
 	 *
 	 * @param int $post_ID Post ID. Defaults to the current post's ID
 	 */
-	public static function get_source( $post_ID = 0 ) {
+	public static function get_sponsor( $post_ID = 0 , $size = 'thumbnail' ) {
 	
 		if ( absint($post_ID) === 0 )
 			$post_ID = $GLOBALS['post']->ID;
-
-		return get_post_meta($post_ID, 'quote-citation-source-name', true);
+			
+		$img_src =  wp_get_attachment_image_src( get_post_thumbnail_id( $post_ID ), $size );
+		
+		if ( empty( $img_src) )
+			return '';
+					
+		return sprintf('<img src="%1$s" alt="%2$s" />', $img_src[0] , get_the_title( $post_ID ) );
 		
 	}
 
 	/**
-	 * Get the quote source's URL
+	 * Get the sponsor's URL
 	 *
 	 * @param int $post_ID Post ID. Defaults to the current post's ID
 	 */
-	public static function get_source_url($post_ID = 0) {
+	public static function get_sponsor_url( $post_ID = 0 ) {
 	
 		if ( absint($post_ID) === 0 )
 			$post_ID = $GLOBALS['post']->ID;
 
-		return get_post_meta($post_ID, 'quote-citation-source-url', true);
+		return get_post_meta( $post_ID , 'sponsor-url', true );
 		
 	}
 	
 	/**
-	 * Get a link to the quote source
+	 * Get a link to the sponsor
 	 *
-	 * Either returns the source name, or if the source URL has been set,
-	 * returns a HTML link to the source.
+	 * Either returns the sponsor thumbnail, or if the sponsor URL has been set,
+	 * returns a HTML link to the sponsor.
 	 *
 	 * @param int $post_ID Post ID. Defaults to the current post's ID
+	 * @param string $string. Defaults to 'thumbnail'
 	 */
-	public static function get_source_link( $post_ID = 0 ) {
+	public static function get_sponsor_link( $post_ID = 0 , $size = 'thumbnail') {
 	
-		$source = self::get_source( $post_ID );
-
-		if ( empty( $source ) )
+		$sponsor = self::get_sponsor( $post_ID , $size );
+		
+		if ( empty( $sponsor ) )
 			return '';
 
-		$url = self::get_source_url($post_ID);
-		
+		$url = self::get_sponsor_url($post_ID);
+	
 		if ( !empty( $url ) )
-			return sprintf('<a href="%1$s" title="%2$s">%2$s</a>', $url , $source );
+			return sprintf('<a href="%1$s" title="%2$s" target="_blank">%3$s</a>', $url , get_the_title( $post_ID ) , $sponsor );
 
-		return $source;
+		return $sponsor;
 		
 	}
 	/**#@-*/
@@ -390,17 +387,17 @@ class WP_Widget_Sponsor extends WP_Widget {
 
 	function __construct() {
 	
-		$widget_ops = array('classname' => 'widget_quote', 'description' => __('Display a quote'));
+		$widget_ops = array('classname' => 'widget_sponsor', 'description' => __('Display a sponsor'));
 		
 		$control_ops = array('width' => 400, 'height' => 350);
 		
-		parent::__construct('quote', __('Quote'), $widget_ops, $control_ops);
+		parent::__construct('sponsor', __('Sponsor'), $widget_ops, $control_ops);
 		
 	}
 
 	function widget( $args, $instance ) {
 		
-		$cache = get_transient( 'widget_simple_quotes' );
+		$cache = get_transient( 'widget_simple_sponsors' );
 				
 		if ( ! is_array( $cache ) )
 			$cache = array();
@@ -427,7 +424,7 @@ class WP_Widget_Sponsor extends WP_Widget {
 		
 		//default args
 		$query_args = array(
-			'post_type' => 'simple_quote',
+			'post_type' => 'simple_sponsor',
 			'posts_per_page' => $number
 		);
 		
@@ -442,7 +439,7 @@ class WP_Widget_Sponsor extends WP_Widget {
 		}
 		
 		//run query
-		$resources = get_posts( $query_args );
+		$sponsors = get_posts( $query_args );
 				
 		// If user has entered a list of IDs display in the order entered
 		if ( empty ( $instance['randomize'] ) && !empty ( $ids ) ) {
@@ -450,15 +447,15 @@ class WP_Widget_Sponsor extends WP_Widget {
 			$sorted_list = array();
 		
 			foreach( $ids as $id ) :
-				foreach( $resources as $resource ) :		
+				foreach( $sponsors as $sponsor ) :		
 					
-					if( $resource->ID == $id )
-						$sorted_list[] = $resource;			
+					if( $sponsor->ID == $id )
+						$sorted_list[] = $sponsor;			
 					
 				endforeach;
 			endforeach;
 		
-			$resources = $sorted_list;
+			$sponsors = $sorted_list;
 		
 		}
 		
@@ -468,35 +465,25 @@ class WP_Widget_Sponsor extends WP_Widget {
 		
 		$count = 1;
 		
-		if ( !empty ( $resources ) ) :
+		if ( !empty ( $sponsors ) ) :
 		 
-			$output .= '<div class="quotewidget">';
+			$output .= '<div class="sponsorwidget">';
 			
-			foreach( $resources as $resource ) : 
+			$output .= '<ul>';
 			
-				$output .= '<blockquote>';
+			foreach( $sponsors as $sponsor ) : 
+			
+				$output .= '<li>';
 				
-				if ( !empty( $instance['curly-quotes'] ) )
-					$output .= '<span class="blockquote-open">&#8220;</span>';
+				$output .= Simple_Sponsors::get_sponsor_link( $sponsor->ID );
 				
-				$output .= apply_filters( 'the_content', $resource->post_content ); 
-
-				if ( !empty( $instance['curly-quotes'] ) )
-					$output .= '<span class="blockquote-close">&#8221;</span>';
-				
-				$output .= '</blockquote><!-- blockquote -->';
-				
-				if ( !empty( $instance['source-link'] ) )
-					$output .= '<cite class="source">' . Simple_Quotes::get_source_link( $resource->ID ) . '</cite><!-- cite -->';
-				else
-					$output .= '<cite class="source">' . Simple_Quotes::get_source( $resource->ID ) . '</cite><!-- cite -->';					
-					
+				$output .= '</li>';
+									
 			endforeach;
 			
-			if ( !empty( $instance['archive-link'] ) )
-				$output .= '<a href="' . get_post_type_archive_link( Simple_Quotes::$post_type_name ) . '" title="' . __('Read more quotes', Simple_Quotes::$text_domain ) . '" class="read-more">' . __('Read more quotes', Simple_Quotes::$text_domain ) . '</a>';
-		
-			$output .= '</div><!-- .quotewidget -->';
+			$output .= '</ul>';
+
+			$output .= '</div><!-- .sponsorwidget -->';
 		
 		endif; //end if !empty ( $resources );
 		
@@ -507,7 +494,7 @@ class WP_Widget_Sponsor extends WP_Widget {
 		//cache output
 		$cache[ $args['widget_id'] ] = $output;
 		
-		set_transient( 'widget_simple_quotes', $cache, 60*60*12 );
+		set_transient( 'widget_simple_sponsors', $cache, 60*60*12 );
 		
 	}
 
@@ -522,15 +509,9 @@ class WP_Widget_Sponsor extends WP_Widget {
 		$instance['ids'] = strip_tags($new_instance['ids']);
 		
 		$instance['randomize'] = isset($new_instance['randomize']);
-		
-		$instance['curly-quotes'] = isset($new_instance['curly-quotes']);
-		
-		$instance['source-link'] = isset($new_instance['source-link']);
-		
-		$instance['archive-link'] = isset($new_instance['archive-link']);
-		
+				
 		//flush cache
-		delete_transient( 'widget_simple_quotes' );
+		delete_transient( 'widget_simple_sponsors' );
 		
 		return $instance;
 		
@@ -552,28 +533,16 @@ class WP_Widget_Sponsor extends WP_Widget {
 			<input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo esc_attr($title); ?>" />
 		</p>
 		<p>
-			<label for="<?php echo $this->get_field_id('number'); ?>"><?php _e('Number of quotes to show:'); ?></label>
+			<label for="<?php echo $this->get_field_id('number'); ?>"><?php _e('Number of sponsors to show:'); ?></label>
 			<input id="<?php echo $this->get_field_id('number'); ?>" name="<?php echo $this->get_field_name('number'); ?>" type="text" value="<?php echo $number; ?>" size="3" />
 		</p>
 		<p>
-			<label for="<?php echo $this->get_field_id('ids'); ?>"><?php _e('Quote IDs: (optional - overrides number of quotes above)'); ?></label>
+			<label for="<?php echo $this->get_field_id('ids'); ?>"><?php _e('Sponsor IDs: (optional - overrides number of sponsors above)'); ?></label>
 			<input class="widefat" id="<?php echo $this->get_field_id('ids'); ?>" name="<?php echo $this->get_field_name('ids'); ?>" type="text" value="<?php echo esc_attr($ids); ?>" />
 		</p>
 		<p>
 			<input id="<?php echo $this->get_field_id('randomize'); ?>" name="<?php echo $this->get_field_name('randomize'); ?>" type="checkbox" <?php checked(isset($instance['randomize']) ? $instance['randomize'] : 0); ?> />
-			&nbsp;<label for="<?php echo $this->get_field_id('randomize'); ?>"><?php _e('Randomize quotes'); ?></label>
-		</p>
-		<p>
-			<input id="<?php echo $this->get_field_id('curly-quotes'); ?>" name="<?php echo $this->get_field_name('curly-quotes'); ?>" type="checkbox" <?php checked(isset($instance['curly-quotes']) ? $instance['curly-quotes'] : 0); ?> />
-			&nbsp;<label for="<?php echo $this->get_field_id('curly-quotes'); ?>"><?php _e('Include extra curly quotes spans'); ?></label>
-		</p>
-		<p>
-			<input id="<?php echo $this->get_field_id('source-link'); ?>" name="<?php echo $this->get_field_name('source-link'); ?>" type="checkbox" <?php checked(isset($instance['source-link']) ? $instance['source-link'] : 0); ?> />
-			&nbsp;<label for="<?php echo $this->get_field_id('source-link'); ?>"><?php _e('Link source name to source url'); ?></label>
-		</p>
-		<p>
-			<input id="<?php echo $this->get_field_id('archive-link'); ?>" name="<?php echo $this->get_field_name('archive-link'); ?>" type="checkbox" <?php checked(isset($instance['archive-link']) ? $instance['archive-link'] : 0); ?> />
-			&nbsp;<label for="<?php echo $this->get_field_id('archive-link'); ?>"><?php _e('Display link to quote archive'); ?></label>
+			&nbsp;<label for="<?php echo $this->get_field_id('randomize'); ?>"><?php _e('Randomize sponsors'); ?></label>
 		</p>
 <?php
 	}
