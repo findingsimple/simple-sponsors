@@ -475,7 +475,7 @@ class WP_Widget_Sponsor extends WP_Widget {
 			
 				$output .= '<li>';
 				
-				$output .= Simple_Sponsors::get_sponsor_link( $sponsor->ID );
+				$output .= Simple_Sponsors::get_sponsor_link( $sponsor->ID , $instance['imgsize'] );
 				
 				$output .= '</li>';
 									
@@ -509,6 +509,8 @@ class WP_Widget_Sponsor extends WP_Widget {
 		$instance['ids'] = strip_tags($new_instance['ids']);
 		
 		$instance['randomize'] = isset($new_instance['randomize']);
+		
+		$instance['imgsize'] = strip_tags($new_instance['imgsize']);
 				
 		//flush cache
 		delete_transient( 'widget_simple_sponsors' );
@@ -526,6 +528,8 @@ class WP_Widget_Sponsor extends WP_Widget {
 		$number = isset($instance['number']) ? absint($instance['number']) : 5;
 		
 		$ids = strip_tags($instance['ids']);
+		
+		$imgsize = strip_tags($instance['imgsize']);
 
 ?>
 		<p>
@@ -543,6 +547,15 @@ class WP_Widget_Sponsor extends WP_Widget {
 		<p>
 			<input id="<?php echo $this->get_field_id('randomize'); ?>" name="<?php echo $this->get_field_name('randomize'); ?>" type="checkbox" <?php checked(isset($instance['randomize']) ? $instance['randomize'] : 0); ?> />
 			&nbsp;<label for="<?php echo $this->get_field_id('randomize'); ?>"><?php _e('Randomize sponsors'); ?></label>
+		</p>
+		<p>
+			<label for="<?php echo $this->get_field_id('imgsize'); ?>"><?php _e('Image Size'); ?>
+			<select id="<?php echo $this->get_field_id('imgsize'); ?>" name="<?php echo $this->get_field_name('imgsize'); ?>">
+			<?php foreach( get_intermediate_image_sizes() as $size ): ?>
+				<option value="<?php echo $size; ?>" <?php selected( $size, $imgsize ); ?>><?php echo $size; ?></option>
+			<?php endforeach; ?>
+			</select>
+			</label>
 		</p>
 <?php
 	}
