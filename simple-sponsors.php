@@ -83,6 +83,12 @@ class Simple_Sponsors {
 		
 		register_widget('WP_Widget_Sponsor');
 		
+		add_image_size( 'sponsor-admin-thumb', 60, 60, false );
+						
+		add_filter( 'manage_edit-' . self::$post_type_name . '_columns' , array( __CLASS__, 'add_thumbnail_column') , 10 );
+		
+		add_action( 'manage_' . self::$post_type_name . '_posts_custom_column' , array( __CLASS__, 'thumbnail_column_contents') , 10, 2 );
+		
 	}
 
 	/**
@@ -374,6 +380,45 @@ class Simple_Sponsors {
 		return content_url( $post_content_path . $file );
 	}	
 
+	/**
+	 * Add a column to the manage pages page to display sponsor thumbnail. 
+	 * 
+	 * @since 1.0
+	 * @author Jason Conroy
+	 * @package Simple Sponsors
+	 */
+	public static function add_thumbnail_column( $columns ) {
+	
+  		$columns_start = array_slice( $columns, 0, 1, true );
+  		$columns_end   = array_slice( $columns, 1, null, true );
+
+  		$columns = array_merge(
+    		$columns_start,
+    		array( 'logo' => __( '', self::$text_domain ) ),
+    		$columns_end
+  		);
+	
+		return $columns;
+		
+	}	
+	
+	/**
+	 * Add the sponsor logo / thumbnail to the custom column on the manage page.
+	 * 
+	 * @since 1.0
+	 * @author Jason Conroy
+	 * @package Simple Sponsors
+	 */
+	function thumbnail_column_contents( $column_name, $post_id ) {
+				
+		if ( $column_name != 'logo' )
+			return;
+				
+		if ( function_exists('the_post_thumbnail') )
+			echo '<a href="' . get_edit_post_link( $post_id ) . '" title="' . __( 'Edit Sponsor', self::$text_domain ) . '">' . get_the_post_thumbnail( $post_id, 'sponsor-admin-thumb' ) . '</a>';
+					
+	}
+	
 }
 
 endif;
