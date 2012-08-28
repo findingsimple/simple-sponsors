@@ -88,7 +88,15 @@ class Simple_Sponsors {
 		add_filter( 'manage_edit-' . self::$post_type_name . '_columns' , array( __CLASS__, 'add_thumbnail_column') , 10 );
 		
 		add_action( 'manage_' . self::$post_type_name . '_posts_custom_column' , array( __CLASS__, 'thumbnail_column_contents') , 10, 2 );
-		
+
+		add_filter( 'enter_title_here', __CLASS__ . '::change_default_title' );
+
+		add_filter( 'admin_post_thumbnail_html', __CLASS__ . '::change_featured_image_metabox_text' );
+
+		add_filter( 'gettext', __CLASS__ . '::change_featured_image_link_text' );
+
+		add_action( 'add_meta_boxes_' . self::$post_type_name, __CLASS__ . '::rename_featured_image_metabox' );
+
 	}
 
 	/**
@@ -418,6 +426,83 @@ class Simple_Sponsors {
 			echo '<a href="' . get_edit_post_link( $post_id ) . '" title="' . __( 'Edit Sponsor', self::$text_domain ) . '">' . get_the_post_thumbnail( $post_id, 'sponsor-admin-thumb' ) . '</a>';
 					
 	}
+
+	/**
+	 * Replaces the "Enter title here" text with 
+	 *
+	 * @author Brent Shepherd <brent@findingsimple.com>
+	 * @package Simple Sponsors
+	 * @since 1.0
+	 */
+	public static function change_default_title( $title ){
+		$screen = get_current_screen();
+
+		if  ( self::$post_type_name == $screen->post_type )
+			$title = __( 'Enter Sponsor Name', self::$text_domain );
+
+		return $title;
+	}
+	
+	/**
+	 * Replaces the 'Featured Image' with 'Logo' on the Edit page for the simple_sponsor post type.
+	 *
+	 * @author Brent Shepherd <brent@findingsimple.com>
+	 * @package Simple Sponsors
+	 * @since 1.0
+	 */
+	public static function change_featured_image_metabox_text( $metabox_html ) {
+
+		if ( get_post_type() == self::$post_type_name )
+			$metabox_html = str_replace( 'featured image', esc_attr__( 'Logo', self::$text_domain ), $metabox_html );
+
+		return $metabox_html;
+		
+	}
+
+
+	/**
+	 * Changes the 'Use as featured image' link text on the media panel
+	 *
+	 * @author Brent Shepherd <brent@findingsimple.com>
+	 * @package Simple Sponsors
+	 * @since 1.0
+	 */
+	public static function change_featured_image_link_text( $text ) {
+		global $post;
+
+		if ( $text == 'Use as featured image' ) {
+
+			if ( isset( $_GET['post_id'] ) )
+				$calling_post_id = absint( $_GET['post_id'] );
+			elseif ( isset( $_POST ) && count( $_POST ) )
+				$calling_post_id = $post->post_parent;
+			else
+				$calling_post_id = 0;
+
+			if ( get_post_type( $calling_post_id ) == self::$post_type_name )
+				$text = __( "Use as the sponsors logo", self::$text_domain );
+
+		}
+
+		return $text;
+	}
+
+
+	/**
+	 * Renames the "Featured Image" metabox to "Sponsor Logo"
+	 *
+	 * @author Brent Shepherd <brent@findingsimple.com>
+	 * @package Simple Sponsor
+	 * @since 1.0
+	 */
+	public static function rename_featured_image_metabox() {
+
+		remove_meta_box( 'postimagediv', self::$post_type_name, 'side' );
+
+		add_meta_box( 'postimagediv', __( "Sponsor Logo", self::$text_domain ), 'post_thumbnail_meta_box', self::$post_type_name, 'side', 'low' );
+
+	}	
+	
 	
 }
 
