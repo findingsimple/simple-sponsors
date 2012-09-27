@@ -97,6 +97,8 @@ class Simple_Sponsors {
 
 		add_action( 'add_meta_boxes_' . self::$post_type_name, __CLASS__ . '::rename_featured_image_metabox' );
 
+		add_filter( 'image_size_names_choose', __CLASS__ . '::remove_image_size_options' );
+
 	}
 
 	/**
@@ -154,7 +156,7 @@ class Simple_Sponsors {
 			5 => isset($_GET['revision']) ? sprintf( __('Sponsor restored to revision from %s', self::$text_domain ), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
 			6 => sprintf( __('Sponsor published. <a href="%s">View sponsor</a>', self::$text_domain ), esc_url( get_permalink($post->ID) ) ),
 			7 => __('Sponsor saved.', self::$text_domain ),
-			8 => sprintf( __('Sponsor submitted. <a target="_blank" href="%s">Preview bio</a>', self::$text_domain ), esc_url( add_query_arg( 'preview', 'true', get_permalink($post->ID) ) ) ),
+			8 => sprintf( __('Sponsor submitted. <a target="_blank" href="%s">Preview sponsor</a>', self::$text_domain ), esc_url( add_query_arg( 'preview', 'true', get_permalink($post->ID) ) ) ),
 			9 => sprintf( __('Sponsor scheduled for: <strong>%1$s</strong>. <a target="_blank" href="%2$s">Preview sponsor</a>', self::$text_domain ),
 			  // translators: Publish box date format, see http://php.net/date
 			  date_i18n( __( 'M j, Y @ G:i' ), strtotime( $post->post_date ) ), esc_url( get_permalink($post->ID) ) ),
@@ -502,6 +504,21 @@ class Simple_Sponsors {
 		add_meta_box( 'postimagediv', __( "Sponsor Logo", self::$text_domain ), 'post_thumbnail_meta_box', self::$post_type_name, 'side', 'low' );
 
 	}	
+	
+	/**
+	 * Remove admin thumbnail size from the list of available sizes in the media uploader
+	 *
+	 * @author Jason Conroy <jason@findingsimple.com>
+	 * @package Simple Sponsors
+	 * @since 1.0
+	 */	
+	public static function remove_image_size_options( $sizes ){
+	 
+		unset($sizes['sponsor-admin-thumb']);
+		
+		return $sizes;
+	 
+	}
 	
 	
 }
