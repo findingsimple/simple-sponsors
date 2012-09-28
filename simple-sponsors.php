@@ -71,6 +71,8 @@ class Simple_Sponsors {
 
 		add_action( 'init', array( __CLASS__, 'register' ) );
 		
+		add_action( 'init', array( __CLASS__, 'register_taxonomies' ), 0 );
+		
 		add_filter( 'post_updated_messages', array( __CLASS__, 'updated_messages' ) );
 		
 		add_action( 'add_meta_boxes', array( __CLASS__, 'add_meta_box' ) );
@@ -85,9 +87,11 @@ class Simple_Sponsors {
 		
 		add_image_size( 'sponsor-admin-thumb', 60, 60, false );
 						
-		add_filter( 'manage_edit-' . self::$post_type_name . '_columns' , array( __CLASS__, 'add_thumbnail_column') , 10 );
+		add_filter( 'manage_edit-' . self::$post_type_name . '_columns' , array( __CLASS__, 'add_columns') , 10 );
 		
 		add_action( 'manage_' . self::$post_type_name . '_posts_custom_column' , array( __CLASS__, 'thumbnail_column_contents') , 10, 2 );
+
+		add_action( 'manage_' . self::$post_type_name . '_posts_custom_column' , array( __CLASS__, 'taxonomy_column_contents') , 10, 2 );
 
 		add_filter( 'enter_title_here', __CLASS__ . '::change_default_title' );
 
@@ -99,8 +103,6 @@ class Simple_Sponsors {
 
 		add_filter( 'image_size_names_choose', __CLASS__ . '::remove_image_size_options' );
 		
-		add_action( 'init', __CLASS__ . '::register_taxonomies' , 0 );
-
 	}
 
 	/**
@@ -399,17 +401,33 @@ class Simple_Sponsors {
 	 * @author Jason Conroy
 	 * @package Simple Sponsors
 	 */
-	public static function add_thumbnail_column( $columns ) {
+	public static function add_columns( $columns ) {
+	
+		global $post_type;
 	
   		$columns_start = array_slice( $columns, 0, 1, true );
   		$columns_end   = array_slice( $columns, 1, null, true );
-
+		
+		// add logo coloumn in first
   		$columns = array_merge(
     		$columns_start,
     		array( 'logo' => __( '', self::$text_domain ) ),
     		$columns_end
   		);
+  		
+  		// append taxonomy columns on end
+		$taxonomy_names = get_object_taxonomies( self::$post_type_name );
 	
+		foreach ( $taxonomy_names as $taxonomy_name ) {
+	
+			$taxonomy = get_taxonomy( $taxonomy_name );
+	
+			if ( $taxonomy->_builtin || !in_array( $post_type , $taxonomy->object_type ) )
+				continue;
+	
+			$columns[ $taxonomy_name ] = $taxonomy->label;
+		}
+		
 		return $columns;
 		
 	}	
@@ -558,7 +576,48 @@ class Simple_Sponsors {
 			) 
 		);
 	
-	}	
+	}
+		
+	/**
+	 * Add the terms assigned to a post for each registered custom taxonomy to the
+	 * custom column on the manage posts page.
+	 *
+	 * @author Brent Shepherd <brent@findingsimple.com>
+	 * @package Simple Sponsors
+	 * @version 1.0
+	 */
+	
+	function taxonomy_column_contents( $column_name, $post_id ) {
+		global $wpdb, $post_type;
+	
+		$taxonomy_names = get_object_taxonomies( self::$post_type_name );
+		
+		$type = ''; //set blank post type
+		
+		if ($post_type != 'post') {
+			$type = 'post_type=' . $post_type . '&';
+		}
+	
+		foreach ( $taxonomy_names as $taxonomy_name ) {
+		
+			$taxonomy = get_taxonomy( $taxonomy_name );
+	
+			if ( $taxonomy->_builtin || $column_name != $taxonomy_name )
+				continue;
+	
+			$terms = get_the_terms( $post_id, $taxonomy_name ); //lang is the first custom taxonomy slug
+			
+			if ( !empty( $terms ) ) {
+				$out = array();
+				foreach ( $terms as $term )
+					$termlist[] = "<a href='edit.php?" . $type . $taxonomy->query_var."=$term->slug'> " . esc_html( sanitize_term_field( 'name', $term->name, $term->term_id, $taxonomy_name, 'display' ) ) . "</a>";
+				echo join( ', ', $termlist );
+			} else {
+				printf( __( 'No %s.'), $taxonomy->label );
+			}
+			
+		}
+	}
 	
 }
 
