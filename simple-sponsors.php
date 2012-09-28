@@ -424,7 +424,7 @@ class Simple_Sponsors {
 	
 			if ( $taxonomy->_builtin || !in_array( $post_type , $taxonomy->object_type ) )
 				continue;
-	
+				
 			$columns[ $taxonomy_name ] = $taxonomy->label;
 		}
 		
