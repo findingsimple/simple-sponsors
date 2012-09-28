@@ -98,6 +98,8 @@ class Simple_Sponsors {
 		add_action( 'add_meta_boxes_' . self::$post_type_name, __CLASS__ . '::rename_featured_image_metabox' );
 
 		add_filter( 'image_size_names_choose', __CLASS__ . '::remove_image_size_options' );
+		
+		add_action( 'init', __CLASS__ . '::register_taxonomies' , 0 );
 
 	}
 
@@ -519,7 +521,44 @@ class Simple_Sponsors {
 		return $sizes;
 	 
 	}
+
+	/**
+	 * Add a sponsor level taxonomy for grouping sponsors
+	 *
+	 * @author Jason Conroy <jason@findingsimple.com>
+	 * @package Simple Sponsors
+	 * @since 1.0
+	 */		
+	public static function register_taxonomies() {
 	
+		register_taxonomy( 'sponsor_level', 
+			array( self::$post_type_name ),
+			array( 
+				'hierarchical'  => true, 
+				'query_var'     => 'sponsor_level', 
+				'rewrite'       => array(
+					'slug'         => __( 'sponsor-level', self::$text_domain ),
+					'with_front'   => false,
+					'hierarchical' => true
+				),
+				'label'         => __( 'Sponsor Level', self::$text_domain ),
+				'labels'        => array( 
+					'name'              => _x( 'Sponsor Levels', self::$text_domain ),
+					'singular_name'     => _x( 'Sponsor Level', self::$text_domain ),
+					'search_items'      => __( 'Search Sponsor Levels', self::$text_domain ),
+					'popular_items'     => __( 'Popular Sponsor Levels', self::$text_domain ),
+					'all_items'         => __( 'All Sponsor Levels', self::$text_domain ),
+					'parent_item'       => __( 'Parent Sponsor Level', self::$text_domain ),
+					'parent_item_colon' => __( 'Parent Sponsor Level:', self::$text_domain ),
+					'edit_item'         => __( 'Edit Sponsor Level', self::$text_domain ),
+					'update_item'       => __( 'Update Sponsor Level', self::$text_domain ),
+					'add_new_item'      => __( 'Add New Sponsor Level', self::$text_domain ),
+					'new_item_name'     => __( 'New Sponsor Level Name', self::$text_domain )
+				)
+			) 
+		);
+	
+	}	
 	
 }
 
