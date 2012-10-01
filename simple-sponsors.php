@@ -210,6 +210,7 @@ class Simple_Sponsors {
 			<br />
 			<input type="url" name="sponsor-url" id="sponsor-url"
 				value="<?php echo esc_attr( get_post_meta( $object->ID, 'sponsor-url', true ) ); ?>"
+				placeholder="http://" 
 				size="30" tabindex="30" style="width: 99%;" />
 		</p>
 
