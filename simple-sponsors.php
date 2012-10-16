@@ -235,7 +235,7 @@ class Simple_Sponsors {
 		);
 
 		foreach ( $meta as $meta_key ) {
-			$new_meta_value = '_' . $_POST[$meta_key];
+			$new_meta_value = $_POST[$meta_key];
 
 			/* Get the meta value of the custom field key. */
 			$meta_value = get_post_meta( $post_id, '_' . $meta_key , true );
