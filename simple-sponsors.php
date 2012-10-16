@@ -187,7 +187,7 @@ class Simple_Sponsors {
 	}
 	
 	/**
-	 * Add the citation meta box
+	 * Add the sponsor meta box
 	 *
 	 * @wp-action add_meta_boxes
 	 */
@@ -209,7 +209,7 @@ class Simple_Sponsors {
 			<label for="sponsor-url"><?php _e( 'Sponsor URL:', self::$text_domain ); ?></label>
 			<br />
 			<input type="url" name="sponsor-url" id="sponsor-url"
-				value="<?php echo esc_attr( get_post_meta( $object->ID, 'sponsor-url', true ) ); ?>"
+				value="<?php echo esc_attr( get_post_meta( $object->ID, '_sponsor-url', true ) ); ?>"
 				placeholder="http://" 
 				size="30" tabindex="30" style="width: 99%;" />
 		</p>
@@ -218,7 +218,7 @@ class Simple_Sponsors {
 	}
 
 	/**
-	 * Save the citation metadata
+	 * Save the sponsor metadata
 	 *
 	 * @wp-action save_post
 	 * @param int $post_id The ID of the current post being saved.
@@ -235,22 +235,22 @@ class Simple_Sponsors {
 		);
 
 		foreach ( $meta as $meta_key ) {
-			$new_meta_value = $_POST[$meta_key];
+			$new_meta_value = '_' . $_POST[$meta_key];
 
 			/* Get the meta value of the custom field key. */
-			$meta_value = get_post_meta( $post_id, $meta_key, true );
+			$meta_value = get_post_meta( $post_id, '_' . $meta_key , true );
 
 			/* If there is no new meta value but an old value exists, delete it. */
 			if ( '' == $new_meta_value && $meta_value )
-				delete_post_meta( $post_id, $meta_key, $meta_value );
+				delete_post_meta( $post_id, '_' . $meta_key , $meta_value );
 
 			/* If a new meta value was added and there was no previous value, add it. */
 			elseif ( $new_meta_value && '' == $meta_value )
-				add_post_meta( $post_id, $meta_key, $new_meta_value, true );
+				add_post_meta( $post_id, '_' . $meta_key , $new_meta_value, true );
 
 			/* If the new meta value does not match the old value, update it. */
 			elseif ( $new_meta_value && $new_meta_value != $meta_value )
-				update_post_meta( $post_id, $meta_key, $new_meta_value );
+				update_post_meta( $post_id, '_' . $meta_key , $new_meta_value );
 		}
 	}
 
@@ -312,7 +312,7 @@ class Simple_Sponsors {
 		if ( absint($post_ID) === 0 )
 			$post_ID = $GLOBALS['post']->ID;
 
-		return get_post_meta( $post_ID , 'sponsor-url', true );
+		return get_post_meta( $post_ID , '_sponsor-url', true );
 		
 	}
 	
