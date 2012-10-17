@@ -26,6 +26,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+require_once dirname( __FILE__ ) . '/simple-sponsors-link-to.php';
+
 if ( ! class_exists( 'Simple_Sponsors' ) ) :
 
 /**
@@ -192,7 +194,7 @@ class Simple_Sponsors {
 	 * @wp-action add_meta_boxes
 	 */
 	public static function add_meta_box() {
-		add_meta_box( 'sponsor-meta', __( 'Sponsor Meta', self::$text_domain  ), array( __CLASS__, 'do_meta_box' ), 'simple_sponsor', 'normal', 'high' );
+		add_meta_box( 'sponsor-meta', __( 'Sponsor Meta', self::$text_domain  ), array( __CLASS__, 'do_meta_box' ), self::$post_type_name , 'normal', 'high' );
 	}
 
 	/**
