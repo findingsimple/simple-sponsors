@@ -1,7 +1,7 @@
 <?php
 
 /** 
- * Based on the  'Pages links to' plugin 
+ * Based on the  'Page links to' plugin 
  * by Mark Jaquith 
  * http://txfx.net/wordpress-plugins/page-links-to/ 
  */
@@ -162,8 +162,7 @@ class Simple_Sponsors_Link_To {
 		<p><label><input type="radio" id="sponsor-links-to-wp" name="sponsor-links-to-choice" value="wp" <?php checked( 'wp', $choice ); ?> /> <?php _e( 'Its normal WordPress URL', $this->text_domain ); ?></label></p>
 		<p><label><input type="radio" id="sponsor-links-to-sponsor-url" name="sponsor-links-to-choice" value="sponsor-url" <?php checked( 'sponsor-url', $choice  ); ?> /> <?php _e( 'The Sponsor URL', $this->text_domain ); ?></label></p>
 		<div style="margin-left: 30px;" id="sponsor-links-to-sponsor-url-section" class="">
-			<p><label><input type="radio" id="sponsor-links-to-self" name="sponsor-links-to-target" value="_self" <?php checked( '_self', $target ); ?> /> <?php _e( 'Open this link in the same window (default)', $this->text_domain ); ?></label></p>
-			<p><label><input type="radio" id="sponsor-links-to-new-window" name="sponsor-links-to-target" value="_blank" <?php checked( '_blank', $target ); ?> /> <?php _e( 'Open this link in a new window', $this->text_domain ); ?></label></p>
+			<p><label for="sponsor-links-to-target"><input type="checkbox" name="sponsor-links-to-target" id="sponsor-links-to-new-window" value="_blank" <?php checked( '_blank', $target ); ?>> <?php _e( 'Open this link in a new window', $this->text_domain  ); ?></label></p>
 		</div>		
 <?php
 	}
@@ -295,7 +294,9 @@ class Simple_Sponsors_Link_To {
 		if ( $highlight ) {
 		
 			$pages = preg_replace( '| class="([^"]+)current_page_item"|', ' class="$1"', $pages ); // Kill default highlighting
+			
 			$pages = preg_replace( '|<li class="([^"]+)"><a href="' . preg_quote( $current_page ) . '"|', '<li class="$1 current_page_item"><a href="' . $current_page . '"', $pages );
+			
 		}
 		
 		return $pages;
@@ -303,11 +304,12 @@ class Simple_Sponsors_Link_To {
 	}
 
 	/**
-	 * Filters nav menu
+	 * Filters nav menu to set the correct target
 	 */
 	function wp_nav_menu_objects( $items, $args ) {
 	
 		$links_to_target_cache = $this->get_targets();
+		
 		$new_items = array();
 		
 		foreach ( $items as $item ) {
