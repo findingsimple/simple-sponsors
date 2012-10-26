@@ -226,7 +226,6 @@ class Simple_Sponsors {
 	 * @param int $post_id The ID of the current post being saved.
 	 */
 	public static function save_meta( $post_id ) {
-		$prefix = hybrid_get_prefix();
 
 		/* Verify the nonce before proceeding. */
 		if ( !isset( $_POST['sponsor-meta'] ) || !wp_verify_nonce( $_POST['sponsor-meta'], basename( __FILE__ ) ) )
