@@ -39,7 +39,7 @@ class Simple_Sponsors_Link_To {
 
 	function __construct() { 
 	
-		$this->text_domain = apply_filters( 'simple_sponsors_text_domain', 'Simple_Sponsors' ); 
+		self::$text_domain = apply_filters( 'simple_sponsors_text_domain', 'Simple_Sponsors' ); 
 	
 		$this->post_type_name = apply_filters( 'simple_sponsors_post_type_name', 'simple_sponsor' );		
 
@@ -141,7 +141,7 @@ class Simple_Sponsors_Link_To {
 	 * @wp-action add_meta_boxes
 	 */
 	function add_meta_box() {
-		add_meta_box( 'sponsor-link', __( 'Sponsor Link', $this->text_domain  ), array( $this, 'do_meta_box' ), $this->post_type_name , 'normal', 'high' );
+		add_meta_box( 'sponsor-link', __( 'Sponsor Link', self::$text_domain  ), array( $this, 'do_meta_box' ), $this->post_type_name , 'normal', 'high' );
 	}
 
 	/**
@@ -158,11 +158,11 @@ class Simple_Sponsors_Link_To {
 
 		wp_nonce_field( basename( __FILE__ ), 'sponsor-link' );
 ?>
-		<p><?php _e( 'Point this sponsor to:', $this->text_domain ); ?></p>
-		<p><label><input type="radio" id="sponsor-links-to-wp" name="sponsor-links-to-choice" value="wp" <?php checked( 'wp', $choice ); ?> /> <?php _e( 'Its normal WordPress URL', $this->text_domain ); ?></label></p>
-		<p><label><input type="radio" id="sponsor-links-to-sponsor-url" name="sponsor-links-to-choice" value="sponsor-url" <?php checked( 'sponsor-url', $choice  ); ?> /> <?php _e( 'The Sponsor URL', $this->text_domain ); ?></label></p>
+		<p><?php _e( 'Point this sponsor to:', self::$text_domain ); ?></p>
+		<p><label><input type="radio" id="sponsor-links-to-wp" name="sponsor-links-to-choice" value="wp" <?php checked( 'wp', $choice ); ?> /> <?php _e( 'Its normal WordPress URL', self::$text_domain ); ?></label></p>
+		<p><label><input type="radio" id="sponsor-links-to-sponsor-url" name="sponsor-links-to-choice" value="sponsor-url" <?php checked( 'sponsor-url', $choice  ); ?> /> <?php _e( 'The Sponsor URL', self::$text_domain ); ?></label></p>
 		<div style="margin-left: 30px;" id="sponsor-links-to-sponsor-url-section" class="">
-			<p><label for="sponsor-links-to-target"><input type="checkbox" name="sponsor-links-to-target" id="sponsor-links-to-new-window" value="_blank" <?php checked( '_blank', $target ); ?>> <?php _e( 'Open this link in a new window', $this->text_domain  ); ?></label></p>
+			<p><label for="sponsor-links-to-target"><input type="checkbox" name="sponsor-links-to-target" id="sponsor-links-to-new-window" value="_blank" <?php checked( '_blank', $target ); ?>> <?php _e( 'Open this link in a new window', self::$text_domain  ); ?></label></p>
 		</div>		
 <?php
 	}
@@ -347,7 +347,7 @@ class Simple_Sponsors_Link_To {
 	 * Notification
 	 */		
 	function notify_of_sponsor_link() {
-		?><div class="updated"><p><?php _e( '<strong>Note</strong>: This sponsor is pointing to the sponsor url.', $this->text_domain ); ?></p></div><?php
+		?><div class="updated"><p><?php _e( '<strong>Note</strong>: This sponsor is pointing to the sponsor url.', self::$text_domain ); ?></p></div><?php
 	}
 
 	/**
