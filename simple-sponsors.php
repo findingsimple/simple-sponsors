@@ -472,7 +472,7 @@ class Simple_Sponsors {
 
 			if ( isset( $_GET['post_id'] ) )
 				$calling_post_id = absint( $_GET['post_id'] );
-			elseif ( isset( $_POST ) && count( $_POST ) )
+			elseif ( isset( $_POST ) && count( $_POST ) && is_object( $post ) )
 				$calling_post_id = $post->post_parent;
 			else
 				$calling_post_id = 0;
