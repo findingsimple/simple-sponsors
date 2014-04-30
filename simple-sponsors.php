@@ -137,7 +137,8 @@ class Simple_Sponsors {
 			'hierarchical' => false,
 			'menu_position' => null,
 			'taxonomies' => array(''),
-			'supports' => array('title', 'editor', 'thumbnail', 'custom-fields')
+			'supports' => array('title', 'editor', 'thumbnail', 'custom-fields'),
+			'menu_icon' => ''
 		); 
 
 		register_post_type( self::$post_type_name , $args );
@@ -178,13 +179,10 @@ class Simple_Sponsors {
 	 * @since 1.0
 	 */
 	public static function enqueue_admin_styles_and_scripts() {
-				
-		if ( is_admin() ) {
 	
-			wp_register_style( 'simple-sponsors', self::get_url( '/css/simple-sponsors-admin.css', __FILE__ ) , false, '1.0' );
-			wp_enqueue_style( 'simple-sponsors' );
-		
-		}
+			?>
+			<style>#adminmenu .menu-icon-simple_sponsor div.wp-menu-image:before { content: "\f307"; }</style>
+			<?php
 		
 	}
 	
